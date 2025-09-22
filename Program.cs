@@ -116,7 +116,7 @@ namespace edu_simple
 
         static void Menu()
         {
-            Console.WriteLine("=== МЕНЮ (упрощённое) ===");
+            Console.WriteLine(" МЕНЮ ");
             Console.WriteLine("1) Добавить институт");
             Console.WriteLine("2) Переименовать институт");
             Console.WriteLine("3) Удалить институт");
@@ -167,7 +167,7 @@ namespace edu_simple
             Console.WriteLine("Неверно.\n"); return null;
         }
 
-        // CRUD
+       
         static void AddInstitute()
         {
             Console.Write("Название: ");
@@ -321,7 +321,7 @@ namespace edu_simple
             catch (Exception ex) { Console.WriteLine("Ошибка записи файла: " + ex.Message + "\n"); }
         }
 
-        // Новый метод: поиск студентов без троек и двоек в выбранном институте
+        // поиск студентов без троек и двоек в выбранном институте
         static void FindStudentsWithNoThreesOrTwos()
         {
             if (institutes.Count == 0) { Console.WriteLine("Нет данных.\n"); return; }
@@ -358,7 +358,7 @@ namespace edu_simple
             Console.WriteLine($"\nВсего найдено: {goodStudents.Count} студент(ов)\n");
         }
 
-        // начальное наполнеие 
+      
         static void Seed()
         {
             var i1 = new Institute("ИТ-институт");
@@ -387,4 +387,5 @@ namespace edu_simple
             autoId = 4;
         }
     }
+
 }
