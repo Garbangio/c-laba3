@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 namespace edu_simple
 {
-    // модели
+    // === модели ===
     public class Student
     {
         public string Id;
         public string FullName;
-        public Dictionary<string, int> Marks = new Dictionary<string, int>(); // subject -> mark (2..5)
+        public Dictionary<string, int> Marks = new Dictionary<string, int>(); // предмет -> оценка (2..5)
 
         public Student(string id, string fullName) { Id = id; FullName = fullName; }
 
@@ -18,14 +17,6 @@ namespace edu_simple
         {
             if (Marks.Count == 0) return false;
             foreach (var kv in Marks) if (kv.Value != 5) return false;
-            return true;
-        }
-
-        public bool HasNoThreesOrTwos()
-        {
-            if (Marks.Count == 0) return false;
-            foreach (var kv in Marks) 
-                if (kv.Value == 2 || kv.Value == 3) return false;
             return true;
         }
 
@@ -55,28 +46,7 @@ namespace edu_simple
         public List<Course> Courses = new List<Course>();
         public Institute(string name) { Name = name; }
 
-        public int CountExcellent()
-        {
-            int c = 0;
-            foreach (var crs in Courses)
-                foreach (var g in crs.Groups)
-                    foreach (var st in g.Students)
-                        if (st.IsExcellent()) c++;
-            return c;
-        }
-
-        public List<Student> GetStudentsWithNoThreesOrTwos()
-        {
-            var result = new List<Student>();
-            foreach (var crs in Courses)
-                foreach (var g in crs.Groups)
-                    foreach (var st in g.Students)
-                        if (st.HasNoThreesOrTwos()) 
-                            result.Add(st);
-            return result;
-        }
-
-        public override string ToString() => $"Институт: {Name}, курсов: {Courses.Count}, предметов: {Subjects.Count}, отличников: {CountExcellent()}";
+        public override string ToString() => $"Институт: {Name}, курсов: {Courses.Count}, предметов: {Subjects.Count}";
     }
 
     class Program
@@ -107,8 +77,7 @@ namespace edu_simple
                     case "6": AddStudent(); break;
                     case "7": PutMark(); break;
                     case "8": ListAll(); break;
-                    case "9": QueryAndSave(); break;
-                    case "10": FindStudentsWithNoThreesOrTwos(); break;
+                    case "9": QueryNoBadMarks(); break;
                     default: Console.WriteLine("Нет такого пункта.\n"); break;
                 }
             }
@@ -116,7 +85,7 @@ namespace edu_simple
 
         static void Menu()
         {
-            Console.WriteLine("=== МЕНЮ (упрощённое) ===");
+            Console.WriteLine("=== МЕНЮ ===");
             Console.WriteLine("1) Добавить институт");
             Console.WriteLine("2) Переименовать институт");
             Console.WriteLine("3) Удалить институт");
@@ -125,12 +94,11 @@ namespace edu_simple
             Console.WriteLine("6) Добавить студента в группу");
             Console.WriteLine("7) Поставить/изменить оценку студенту");
             Console.WriteLine("8) Показать все данные");
-            Console.WriteLine("9) Запрос: институт с наибольшим числом отличников (в файл)");
-            Console.WriteLine("10) Запрос: студенты без троек и двоек (в институте)");
+            Console.WriteLine("9) Запрос: фамилии студентов, у которых нет троек и двоек ");
             Console.WriteLine("0) Выход\n");
         }
 
-        // Выборы
+        // === выборы ===
         static Institute PickInstitute()
         {
             if (institutes.Count == 0) { Console.WriteLine("Институтов нет.\n"); return null; }
@@ -167,7 +135,7 @@ namespace edu_simple
             Console.WriteLine("Неверно.\n"); return null;
         }
 
-        // CRUD
+        // === CRUD ===
         static void AddInstitute()
         {
             Console.Write("Название: ");
@@ -257,7 +225,7 @@ namespace edu_simple
             Console.WriteLine("Сохранено.\n");
         }
 
-        // Вывод и запрос
+        // === вывод ===
         static void ListAll()
         {
             if (institutes.Count == 0) { Console.WriteLine("Данных нет.\n"); return; }
@@ -301,90 +269,70 @@ namespace edu_simple
             }
         }
 
-        static void QueryAndSave()
+        // === запрос: студенты без двоек и троек ===
+        static void QueryNoBadMarks()
         {
             if (institutes.Count == 0) { Console.WriteLine("Нет данных.\n"); return; }
 
-            Institute best = null; int bestCnt = -1;
+            List<string> lines = new List<string>();
+            lines.Add("Студенты, у которых нет двоек и троек:");
+
             foreach (var inst in institutes)
+                foreach (var c in inst.Courses)
+                    foreach (var g in c.Groups)
+                        foreach (var s in g.Students)
+                        {
+                            if (s.Marks.Count > 0 && !s.Marks.ContainsValue(2) && !s.Marks.ContainsValue(3))
+                            {
+                                string info = $"{s.FullName} (Институт: {inst.Name}, Курс: {c.Number}, Группа: {g.Name})";
+                                Console.WriteLine(info);
+                                lines.Add(info);
+                            }
+                        }
+
+            Console.WriteLine();
+
+            try
             {
-                int c = inst.CountExcellent();
-                if (c > bestCnt) { bestCnt = c; best = inst; }
+                File.WriteAllLines("result.txt", lines);
+                Console.WriteLine("Сохранено в result.txt\n");
             }
-
-            string text = (best == null)
-                ? "Нет данных."
-                : $"Институт с наибольшим числом отличников: {best.Name}. Количество отличников: {bestCnt}.";
-
-            Console.WriteLine(text + "\n");
-            try { File.WriteAllText("result.txt", text); Console.WriteLine("Сохранено в result.txt\n"); }
-            catch (Exception ex) { Console.WriteLine("Ошибка записи файла: " + ex.Message + "\n"); }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ошибка записи файла: " + ex.Message + "\n");
+            }
         }
 
-        // Новый метод: поиск студентов без троек и двоек в выбранном институте
-        static void FindStudentsWithNoThreesOrTwos()
-        {
-            if (institutes.Count == 0) { Console.WriteLine("Нет данных.\n"); return; }
-
-            var inst = PickInstitute(); 
-            if (inst == null) return;
-
-            var goodStudents = inst.GetStudentsWithNoThreesOrTwos();
-
-            if (goodStudents.Count == 0)
-            {
-                Console.WriteLine($"В институте '{inst.Name}' нет студентов без троек и двоек.\n");
-                return;
-            }
-
-            Console.WriteLine($"=== Студенты института '{inst.Name}' без троек и двоек ===\n");
-            
-            foreach (var student in goodStudents)
-            {
-                Console.Write($"{student.FullName} (ID: {student.Id}) - оценки: ");
-                
-                if (student.Marks.Count > 0)
-                {
-                    var marks = string.Join(", ", student.Marks.Select(kv => $"{kv.Key}: {kv.Value}"));
-                    Console.Write(marks);
-                }
-                else
-                {
-                    Console.Write("нет оценок");
-                }
-                Console.WriteLine();
-            }
-
-            Console.WriteLine($"\nВсего найдено: {goodStudents.Count} студент(ов)\n");
-        }
-
-        // начальное наполнеие 
+        // === начальное наполнение ===
         static void Seed()
         {
-            var i1 = new Institute("ИТ-институт");
+            var i1 = new Institute("Гос-институт");
             i1.Subjects.AddRange(new[] { "Программирование", "Математика" });
             var c1 = new Course(1);
-            var g1 = new Group("ФИ22");
-            var s1 = new Student("S001", "Иванов Иван");
+            var g1 = new Group("П2");
+            var s1 = new Student("S001", "Дрон");
             s1.Marks["Программирование"] = 5;
             s1.Marks["Математика"] = 5;
-            var s2 = new Student("S002", "Кай Шик");
+            var s2 = new Student("S002", "Головач Лена");
             s2.Marks["Программирование"] = 4;
             s2.Marks["Математика"] = 5;
-            g1.Students.Add(s1); g1.Students.Add(s2);
+            var s3 = new Student("S003", "Надя Куховарка");
+            s3.Marks["Программирование"] = 3;
+            s3.Marks["Математика"] = 4;
+            g1.Students.Add(s1); g1.Students.Add(s2); g1.Students.Add(s3);
             c1.Groups.Add(g1); i1.Courses.Add(c1);
             institutes.Add(i1);
 
-            var i2 = new Institute("Инженерный институт");
+            var i2 = new Institute("Какой-то институт");
             i2.Subjects.Add("Физика");
             var c2 = new Course(1);
-            var g2 = new Group("ФИ21");
-            var s3 = new Student("S003", "Анова Анна");
-            s3.Marks["Физика"] = 5;
-            g2.Students.Add(s3); c2.Groups.Add(g2); i2.Courses.Add(c2);
+            var g2 = new Group("И1");
+            var s4 = new Student("S004", "Нег Рот");
+            s4.Marks["Физика"] = 5;
+            g2.Students.Add(s4); c2.Groups.Add(g2); i2.Courses.Add(c2);
             institutes.Add(i2);
 
-            autoId = 4;
+            autoId = 5;
         }
     }
 }
