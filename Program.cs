@@ -4,7 +4,7 @@ using System.IO;
 
 namespace edu_simple
 {
-    // === модели ===
+    
     public class Student
     {
         public string Id;
@@ -336,3 +336,4 @@ namespace edu_simple
         }
     }
 }
+
