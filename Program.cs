@@ -4,12 +4,12 @@ using System.IO;
 
 namespace edu_simple
 {
-    
+
     public class Student
     {
-        public string Id;
-        public string FullName;
-        public Dictionary<string, int> Marks = new Dictionary<string, int>(); // предмет -> оценка (2..5)
+        public string Id;                 
+        public string FullName;             
+        public Dictionary<string, int> Marks = new Dictionary<string, int>(); 
 
         public Student(string id, string fullName) { Id = id; FullName = fullName; }
 
@@ -25,25 +25,25 @@ namespace edu_simple
 
     public class Group
     {
-        public string Name;
-        public List<Student> Students = new List<Student>();
+        public string Name;                 
+        public List<Student> Students = new List<Student>(); 
         public Group(string name) { Name = name; }
         public override string ToString() => $"Группа {Name}, студентов: {Students.Count}";
     }
 
     public class Course
     {
-        public int Number; // 1..6
-        public List<Group> Groups = new List<Group>();
+        public int Number;                  
+        public List<Group> Groups = new List<Group>(); 
         public Course(int number) { Number = number; }
         public override string ToString() => $"Курс {Number}, групп: {Groups.Count}";
     }
 
     public class Institute
     {
-        public string Name;
-        public List<string> Subjects = new List<string>(); // просто имена предметов
-        public List<Course> Courses = new List<Course>();
+        public string Name;                 
+        public List<string> Subjects = new List<string>(); 
+        public List<Course> Courses = new List<Course>(); 
         public Institute(string name) { Name = name; }
 
         public override string ToString() => $"Институт: {Name}, курсов: {Courses.Count}, предметов: {Subjects.Count}";
@@ -51,38 +51,38 @@ namespace edu_simple
 
     class Program
     {
-        static List<Institute> institutes = new List<Institute>();
-        static int autoId = 1; // простая авто-нумерация студентов
+        static List<Institute> institutes = new List<Institute>(); 
+        static int autoId = 1; 
 
         static void Main()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Seed();
+            Seed(); 
 
+            // Главный цикл программы
             while (true)
             {
-                Menu();
+                Menu(); 
                 Console.Write("Выбор: ");
                 var cmd = Console.ReadLine();
                 Console.WriteLine();
 
-                if (cmd == "0") break;
+                if (cmd == "0") break; 
                 switch (cmd)
                 {
-                    case "1": AddInstitute(); break;
-                    case "2": RenameInstitute(); break;
-                    case "3": DeleteInstitute(); break;
-                    case "4": AddSubject(); break;
-                    case "5": AddCourseAndGroup(); break;
-                    case "6": AddStudent(); break;
-                    case "7": PutMark(); break;
-                    case "8": ListAll(); break;
-                    case "9": QueryNoBadMarks(); break;
+                    case "1": AddInstitute(); break;        
+                    case "2": RenameInstitute(); break;       
+                    case "3": DeleteInstitute(); break;       
+                    case "4": AddSubject(); break;            
+                    case "5": AddCourseAndGroup(); break;      
+                    case "6": AddStudent(); break;            
+                    case "7": PutMark(); break;               
+                    case "8": ListAll(); break;               
+                    case "9": QueryNoBadMarks(); break;        
                     default: Console.WriteLine("Нет такого пункта.\n"); break;
                 }
             }
         }
-
         static void Menu()
         {
             Console.WriteLine("=== МЕНЮ ===");
@@ -97,8 +97,8 @@ namespace edu_simple
             Console.WriteLine("9) Запрос: фамилии студентов, у которых нет троек и двоек ");
             Console.WriteLine("0) Выход\n");
         }
-
-        // === выборы ===
+        
+        // Выбор института из списка
         static Institute PickInstitute()
         {
             if (institutes.Count == 0) { Console.WriteLine("Институтов нет.\n"); return null; }
@@ -108,6 +108,7 @@ namespace edu_simple
             Console.WriteLine("Неверно.\n"); return null;
         }
 
+        // Выбор курса из института
         static Course PickCourse(Institute inst)
         {
             if (inst.Courses.Count == 0) { Console.WriteLine("Курсов нет.\n"); return null; }
@@ -117,6 +118,7 @@ namespace edu_simple
             Console.WriteLine("Неверно.\n"); return null;
         }
 
+        // Выбор группы из курса
         static Group PickGroup(Course course)
         {
             if (course.Groups.Count == 0) { Console.WriteLine("Групп нет.\n"); return null; }
@@ -126,6 +128,7 @@ namespace edu_simple
             Console.WriteLine("Неверно.\n"); return null;
         }
 
+        // Выбор студента из группы
         static Student PickStudent(Group group)
         {
             if (group.Students.Count == 0) { Console.WriteLine("Студентов нет.\n"); return null; }
@@ -134,8 +137,8 @@ namespace edu_simple
             if (int.TryParse(Console.ReadLine(), out int iidx) && iidx >= 1 && iidx <= group.Students.Count) return group.Students[iidx - 1];
             Console.WriteLine("Неверно.\n"); return null;
         }
-
-        // === CRUD ===
+        
+        // Добавление нового института
         static void AddInstitute()
         {
             Console.Write("Название: ");
@@ -145,6 +148,7 @@ namespace edu_simple
             Console.WriteLine("Добавлено.\n");
         }
 
+        // Переименование  института
         static void RenameInstitute()
         {
             var inst = PickInstitute(); if (inst == null) return;
@@ -154,12 +158,14 @@ namespace edu_simple
             inst.Name = name; Console.WriteLine("Ок.\n");
         }
 
+        // Удаление института
         static void DeleteInstitute()
         {
             var inst = PickInstitute(); if (inst == null) return;
             institutes.Remove(inst); Console.WriteLine("Удалено.\n");
         }
 
+        // Добавление учебного предмета в институт
         static void AddSubject()
         {
             var inst = PickInstitute(); if (inst == null) return;
@@ -170,6 +176,7 @@ namespace edu_simple
             Console.WriteLine("Добавлено.\n");
         }
 
+        // Добавление курса и или группы в институт
         static void AddCourseAndGroup()
         {
             var inst = PickInstitute(); if (inst == null) return;
@@ -177,6 +184,7 @@ namespace edu_simple
             Console.Write("Номер курса (1..6): ");
             if (!int.TryParse(Console.ReadLine(), out int num) || num < 1 || num > 6) { Console.WriteLine("Неверно.\n"); return; }
 
+            // Поиск или создание курса
             var course = inst.Courses.Find(c => c.Number == num);
             if (course == null) { course = new Course(num); inst.Courses.Add(course); Console.WriteLine("Курс создан."); }
 
@@ -190,13 +198,14 @@ namespace edu_simple
             Console.WriteLine("Группа добавлена.\n");
         }
 
+        // Добавление студента в группу
         static void AddStudent()
         {
             var inst = PickInstitute(); if (inst == null) return;
             var course = PickCourse(inst); if (course == null) return;
             var group = PickGroup(course); if (group == null) return;
 
-            var id = $"S{autoId++:000}";
+            var id = $"S{autoId++:000}"; 
             Console.Write("ФИО: ");
             var fio = Console.ReadLine()?.Trim();
             if (string.IsNullOrWhiteSpace(fio)) { Console.WriteLine("Пусто.\n"); return; }
@@ -205,6 +214,7 @@ namespace edu_simple
             Console.WriteLine($"Добавлен студент {fio} с ID {id}.\n");
         }
 
+        // Постановка или изменение оценки студенту
         static void PutMark()
         {
             var inst = PickInstitute(); if (inst == null) return;
@@ -213,19 +223,23 @@ namespace edu_simple
             var group = PickGroup(course); if (group == null) return;
             var st = PickStudent(group); if (st == null) return;
 
+           
             for (int i = 0; i < inst.Subjects.Count; i++) Console.WriteLine($"{i + 1}. {inst.Subjects[i]}");
             Console.Write("Номер предмета: ");
             if (!int.TryParse(Console.ReadLine(), out int sidx) || sidx < 1 || sidx > inst.Subjects.Count) { Console.WriteLine("Неверно.\n"); return; }
             var subj = inst.Subjects[sidx - 1];
 
+        
             Console.Write("Оценка (2..5): ");
             if (!int.TryParse(Console.ReadLine(), out int m) || m < 2 || m > 5) { Console.WriteLine("Неверно.\n"); return; }
 
-            st.Marks[subj] = m;
+            st.Marks[subj] = m; 
             Console.WriteLine("Сохранено.\n");
         }
 
-        // === вывод ===
+     
+        
+        // Вывод всей структуры данных
         static void ListAll()
         {
             if (institutes.Count == 0) { Console.WriteLine("Данных нет.\n"); return; }
@@ -268,8 +282,8 @@ namespace edu_simple
                 Console.WriteLine();
             }
         }
-
-        // === запрос: студенты без двоек и троек ===
+        
+        // Поиск студентов без двоек и троек с сохранением в файл
         static void QueryNoBadMarks()
         {
             if (institutes.Count == 0) { Console.WriteLine("Нет данных.\n"); return; }
@@ -277,11 +291,13 @@ namespace edu_simple
             List<string> lines = new List<string>();
             lines.Add("Студенты, у которых нет двоек и троек:");
 
+            // Поиск по всем студентам
             foreach (var inst in institutes)
                 foreach (var c in inst.Courses)
                     foreach (var g in c.Groups)
                         foreach (var s in g.Students)
                         {
+                            // Проверка что нет оценок 2 и 3
                             if (s.Marks.Count > 0 && !s.Marks.ContainsValue(2) && !s.Marks.ContainsValue(3))
                             {
                                 string info = $"{s.FullName} (Институт: {inst.Name}, Курс: {c.Number}, Группа: {g.Name})";
@@ -292,6 +308,7 @@ namespace edu_simple
 
             Console.WriteLine();
 
+         
             try
             {
                 File.WriteAllLines("result.txt", lines);
@@ -303,26 +320,33 @@ namespace edu_simple
             }
         }
 
-        // === начальное наполнение ===
+     
         static void Seed()
         {
+            // Создание первого института с данными
             var i1 = new Institute("Гос-институт");
             i1.Subjects.AddRange(new[] { "Программирование", "Математика" });
             var c1 = new Course(1);
             var g1 = new Group("П2");
+            
+           
             var s1 = new Student("S001", "Дрон");
             s1.Marks["Программирование"] = 5;
             s1.Marks["Математика"] = 5;
+            
             var s2 = new Student("S002", "Головач Лена");
             s2.Marks["Программирование"] = 4;
             s2.Marks["Математика"] = 5;
+            
             var s3 = new Student("S003", "Надя Куховарка");
             s3.Marks["Программирование"] = 3;
             s3.Marks["Математика"] = 4;
+            
             g1.Students.Add(s1); g1.Students.Add(s2); g1.Students.Add(s3);
             c1.Groups.Add(g1); i1.Courses.Add(c1);
             institutes.Add(i1);
 
+       
             var i2 = new Institute("Какой-то институт");
             i2.Subjects.Add("Физика");
             var c2 = new Course(1);
@@ -332,8 +356,7 @@ namespace edu_simple
             g2.Students.Add(s4); c2.Groups.Add(g2); i2.Courses.Add(c2);
             institutes.Add(i2);
 
-            autoId = 5;
+            autoId = 5; // Установка начального значения для ID
         }
     }
 }
-
